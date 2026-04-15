@@ -1,9 +1,10 @@
-#pragma once
+﻿#pragma once
 
 namespace Config
 {
 	namespace Card
 	{
+		const int allCardsNum = 52;	// カードの最大枚数
 		// カードのデータ
 		struct CardData
 		{
