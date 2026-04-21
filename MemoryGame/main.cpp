@@ -1,5 +1,5 @@
 ﻿#include "DxLib.h"
-#include "CardManager.h"
+#include "GameManager.h"
 
 // プログラムは WinMain から始まります
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_  HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
@@ -11,17 +11,17 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_  HINSTANCE hPrevInstance, 
 	{
 		return -1;			// エラーが起きたら直ちに終了
 	}
-
-	CardManager cardManager("CSV/card.csv");
 	
+	GameManager gameManager;
+
 	// メインループ
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
 	{
 		ClearDrawScreen();
 
-		cardManager.Update();
+		gameManager.Update();
 
-		cardManager.Draw();
+		gameManager.Draw();
 
 		ScreenFlip();
 	}

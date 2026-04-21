@@ -16,6 +16,7 @@ public:
 	void Update();		// カードの更新を行う
 	void Draw() const;	// カードの描画を行う
 	void Finalize();	// カードの終了処理を行う
+	bool IsCardSelect(int posX, int posY);	// カードを選択する（true：成功, false：失敗）
 
 	// コピーとムーブを禁止する
 	CardManager(const CardManager& other) = delete;
@@ -31,6 +32,10 @@ private:
 	
 	Config::Card::CardData cards[Config::Card::allCardsNum];	// すべてのカード
 	int backCardHandle;		// カードの裏の画像ハンドル
+	int selectCardID[2];	// 選んだカードの番号
+	int selectCount;		// カードの選択回数
 	const int showRow;		// 表示時の行数
 	const int showCol;		// 表示時の列数
+	const int showWidth;	// 表示時のカードの幅
+	const int showHeight;	// 表示時のカードの高さ
 };

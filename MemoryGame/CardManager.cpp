@@ -9,9 +9,13 @@
 CardManager::CardManager(std::string filePath) :
 	cards(),
 	backCardHandle(-1),
+	selectCardID(-1),
+	selectCount(0),
 	showRow(4),
-	showCol(13)
-{ 
+	showCol(13),
+	showWidth(Config::Window::width / showCol),
+	showHeight(Config::Window::height / showRow)
+{
 	Initialize(filePath);
 }
 
@@ -50,23 +54,26 @@ void CardManager::Update()
 }
 
 /// <summary>
-/// カードの描画
+/// すべてのカードの描画
 /// </summary>
 void CardManager::Draw() const
 {
-	const int width = Config::Window::width / showCol;		// 横の表示間隔
-	const int height = Config::Window::height / showRow;	// 縦の表示間隔
-	for (int y = 0; y < showRow; y++)
+	for (int i = 0; i < showRow; i++)
 	{
-		for (int x = 0; x < showCol; x++)
+		for (int j = 0; j < showCol; j++)
 		{
 			// 裏表のフラグによって表示するハンドルを切り替える
 			int hdl = -1;
-			if (cards[y * showCol + x].isBack) hdl = backCardHandle;
-			else hdl = cards[y * showCol + x].handle;
+			if (cards[i * showCol + j].isBack) hdl = backCardHandle;
+			else hdl = cards[i * showCol + j].handle;
 
 			// 拡大縮小して表示
-			DrawRotaGraph(x * width + width / 2, y * height + height / 2, 0.2, 0, hdl, TRUE);
+			DrawExtendGraph(
+				showWidth * j,
+				showHeight * i,
+				showWidth * j + showWidth,
+				showHeight * i + showHeight,
+				hdl, TRUE);
 		}
 	}
 }
@@ -83,6 +90,55 @@ void CardManager::Finalize()
 	}
 
 	DeleteGraph(backCardHandle);
+}
+
+/// <summary>
+/// カードを選択する
+/// </summary>
+/// <param name="x">クリック位置X</param>
+/// <param name="y">クリック位置Y</param>
+/// <returns>
+/// 選択できたか
+/// <para>true：成功</para>
+/// <para>false：失敗</para>
+/// </returns>
+bool CardManager::IsCardSelect(int posX, int posY)
+{
+	// 選択回数が規定数以上だったら、falseを返す
+	if (2 <= selectCount) return false;
+
+	int numX = -1, numY = -1;
+	// どの列に入るか調べる
+	for (int col = 0; col < showCol; col++)
+	{
+		if (showWidth * col <= posX && posX <= showWidth * col + showWidth) 
+		{
+			numX = col;
+			break;
+		}
+	}
+
+	// どの行に入るか調べる
+	for (int row = 0; row < showRow; row++)
+	{
+		if (showHeight * row <= posY && posY <= showHeight * row + showHeight)
+		{
+			numY = row;
+			break;
+		}
+	}
+
+	// 一度選択済みの場合は、重複を確認してから保存する
+	int num = numY * showRow + numX;
+	if (selectCount == 1)
+	{
+		if (selectCardID[0] == num) return false;
+	}
+	
+	selectCardID[selectCount] = num;
+	selectCount++;
+
+	return true;
 }
 
 /// <summary>
