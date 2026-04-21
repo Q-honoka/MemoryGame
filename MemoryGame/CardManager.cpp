@@ -35,6 +35,8 @@ void CardManager::Initialize(std::string filePath)
 
 	// カードの裏の画像ハンドル取得
 	backCardHandle = LoadGraph("image/card/torannpu-illust54.png");
+
+	ShuffleCards();
 }
 
 /// <summary>
@@ -75,6 +77,24 @@ void CardManager::Finalize()
 	}
 
 	DeleteGraph(backCardHandle);
+}
+
+/// <summary>
+/// カードのシャッフル
+/// （フィッシャーイーツ法を使用しています）
+/// </summary>
+void CardManager::ShuffleCards()
+{
+	// 配列の末尾から先頭にかけてシャッフルする
+	for (int i = sizeof(cards) / sizeof(Config::Card::CardData) - 1; i > 0; i--)
+	{
+		// 乱数をiより前から求める
+		int random = GetRand(i);
+		// ランダムな要素と入れ替える
+		Config::Card::CardData temp = cards[i];
+		cards[i] = cards[random];
+		cards[random] = temp;
+	}
 }
 
 /// <summary>

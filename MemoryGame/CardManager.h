@@ -14,7 +14,7 @@ public:
 	~CardManager();		// デストラクタ
 	void Initialize(std::string filePath);	// カードの読み込みと初期化を行う
 	void Update();		// カードの更新を行う
-	void Draw() const;		// カードの描画を行う
+	void Draw() const;	// カードの描画を行う
 	void Finalize();	// カードの終了処理を行う
 
 	// コピーとムーブを禁止する
@@ -24,9 +24,11 @@ public:
 	CardManager(CardManager&& other) = delete;
 	CardManager&& operator=(CardManager&& other) = delete;
 
+	void ShuffleCards();	// カードをシャッフルする
 private:
-	bool LoadCardsFromCSV(std::string filePath);
-	Config::Card::CardData& MakeCardData(int num, std::string color, bool isBack, std::string filePath);
-	Config::Card::CardData cards[Config::Card::allCardsNum];
-	int backCardHandle;
+	bool LoadCardsFromCSV(std::string filePath);	// CSVファイルの読み込み
+	Config::Card::CardData& MakeCardData(int num, std::string color, bool isBack, std::string filePath);	// カード構造体を作成して返す
+	
+	Config::Card::CardData cards[Config::Card::allCardsNum];	// すべてのカード
+	int backCardHandle;		// カードの裏の画像ハンドル
 };
