@@ -27,6 +27,7 @@ public:
 
 private:
 	void ShuffleCards();	// カードをシャッフルする
+	void FlipCard(int num);	// カードの表裏を変える
 	bool LoadCardsFromCSV(std::string filePath);	// CSVファイルの読み込み
 	Config::Card::CardData& MakeCardData(int num, std::string color, bool isBack, std::string filePath);	// カード構造体を作成して返す
 	

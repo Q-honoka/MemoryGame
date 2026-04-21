@@ -129,7 +129,7 @@ bool CardManager::IsCardSelect(int posX, int posY)
 	}
 
 	// 一度選択済みの場合は、重複を確認してから保存する
-	int num = numY * showRow + numX;
+	int num = numY * showCol + numX;
 	if (selectCount == 1)
 	{
 		if (selectCardID[0] == num) return false;
@@ -137,6 +137,8 @@ bool CardManager::IsCardSelect(int posX, int posY)
 	
 	selectCardID[selectCount] = num;
 	selectCount++;
+	// カードを表にする
+	FlipCard(num);
 
 	return true;
 }
@@ -157,6 +159,15 @@ void CardManager::ShuffleCards()
 		cards[i] = cards[random];
 		cards[random] = temp;
 	}
+}
+
+/// <summary>
+/// カードの表裏を変える
+/// </summary>
+/// <param name="num">ひっくり返すカードのID</param>
+void CardManager::FlipCard(int num)
+{
+	cards[num].isBack = !cards[num].isBack;
 }
 
 /// <summary>
