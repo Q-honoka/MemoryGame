@@ -2,6 +2,13 @@
 
 namespace Config
 {
+	namespace Window
+	{
+		const int width = 1920;
+		const int height = 1080;
+		const int colorBitDepth = 32;
+	}
+
 	namespace Card
 	{
 		const int allCardsNum = 52;	// カードの最大枚数

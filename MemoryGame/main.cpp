@@ -5,7 +5,7 @@
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_  HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 {
 	ChangeWindowMode(TRUE);
-	SetGraphMode(640, 480, 16);
+	SetGraphMode(Config::Window::width, Config::Window::height, Config::Window::colorBitDepth);
 
 	if (DxLib_Init() == -1)		// ＤＸライブラリ初期化処理
 	{

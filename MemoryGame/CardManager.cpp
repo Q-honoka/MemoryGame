@@ -8,7 +8,9 @@
 /// <param name="filePath">string：ファイルパス</param>
 CardManager::CardManager(std::string filePath) :
 	cards(),
-	backCardHandle(-1)
+	backCardHandle(-1),
+	showRow(4),
+	showCol(13)
 { 
 	Initialize(filePath);
 }
@@ -52,15 +54,19 @@ void CardManager::Update()
 /// </summary>
 void CardManager::Draw() const
 {
-	for (int y = 0; y < 4; y++)
+	const int width = Config::Window::width / showCol;		// 横の表示間隔
+	const int height = Config::Window::height / showRow;	// 縦の表示間隔
+	for (int y = 0; y < showRow; y++)
 	{
-		for (int x = 0; x < 13; x++)
+		for (int x = 0; x < showCol; x++)
 		{
+			// 裏表のフラグによって表示するハンドルを切り替える
 			int hdl = -1;
-			if (cards[y * 13 + x].isBack) hdl = backCardHandle;
-			else hdl = cards[y * 13 + x].handle;
+			if (cards[y * showCol + x].isBack) hdl = backCardHandle;
+			else hdl = cards[y * showCol + x].handle;
 
-			DrawRotaGraph(x + 40 * x + 50, y + 100 * y + 50, 0.1, 0, hdl, TRUE);
+			// 拡大縮小して表示
+			DrawRotaGraph(x * width + width / 2, y * height + height / 2, 0.2, 0, hdl, TRUE);
 		}
 	}
 }
@@ -148,7 +154,7 @@ bool CardManager::LoadCardsFromCSV(std::string filePath)
 		}
 
 		// カードデータ格納
-		cards[count] = MakeCardData(std::stoi(columns[1]), columns[2], false, columns[3]);
+		cards[count] = MakeCardData(std::stoi(columns[1]), columns[2], true, columns[3]);
 
 		count++;
 	}

@@ -24,11 +24,13 @@ public:
 	CardManager(CardManager&& other) = delete;
 	CardManager&& operator=(CardManager&& other) = delete;
 
-	void ShuffleCards();	// カードをシャッフルする
 private:
+	void ShuffleCards();	// カードをシャッフルする
 	bool LoadCardsFromCSV(std::string filePath);	// CSVファイルの読み込み
 	Config::Card::CardData& MakeCardData(int num, std::string color, bool isBack, std::string filePath);	// カード構造体を作成して返す
 	
 	Config::Card::CardData cards[Config::Card::allCardsNum];	// すべてのカード
 	int backCardHandle;		// カードの裏の画像ハンドル
+	const int showRow;		// 表示時の行数
+	const int showCol;		// 表示時の列数
 };
