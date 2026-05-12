@@ -1,5 +1,6 @@
 ﻿#include "CardManager.h"
 #include "DxLib.h"
+#include "Config.h"
 #include <sstream>
 
 /// <summary>
@@ -156,7 +157,7 @@ bool CardManager::IsCardSelect(int posX, int posY)
 /// 選択した２枚のカードが同じ数字と色か調べる
 /// </summary>
 /// <returns></returns>
-void CardManager::CheckMatch()
+bool CardManager::CheckMatch()
 {
 	bool isMatch = true;	// そろったかどうか
 	// ２枚が異なる色なら、そろっていない
@@ -176,6 +177,28 @@ void CardManager::CheckMatch()
 		FlipCard(selectCardID[0]);
 		FlipCard(selectCardID[1]);
 	}
+
+	// 選択状態を初期化する
+	ResetSelect();
+
+	return isMatch;
+}
+
+/// <summary>
+/// すべてのカードが表向きか返す
+/// </summary>
+/// <returns>
+/// true：表向き, false：裏向きカードが存在する
+/// </returns>
+bool CardManager::IsFrontAllCard()
+{
+	for (int i = 0; i < 52; i++)
+	{
+		// 裏向きが１枚でもあればfalseを返す
+		if (card[i].isBack) return false;
+	}
+
+	return true;
 }
 
 /// <summary>

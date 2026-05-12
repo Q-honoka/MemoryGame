@@ -30,9 +30,24 @@ private:
 		int score;		// スコア
 	};
 
+	// ゲーム内の状態
+	enum State
+	{
+		START,				// 開始
+		FIRST_SELECT,		// １枚目を選択中
+		SECOND_SELECT,		// ２枚目を選択中
+		CHECK_CARD,			// カードがとれるかチェック
+		CHECK_GAMEEND,		// ゲーム終了か調べる
+		END,				// ゲーム終了
+		NONE,				// なにもなし
+	};
+
 	void ChangeGameState();			// 状態を変える
+	void SetNextState(State next);	// 次の状態をセットする
+	bool SelectCard();				// カードの選択
+
 	CardManager cardManager;		// カードの管理クラス
 	InputManager inputManager;		// 入力の管理クラス
-	Config::Game::State state;		// ゲームの現在の状態
-	Config::Game::State nextState;	// ゲームの次の状態
+	State currentState;		// 現在の状態
+	State nextstate;		// 次の状態
 };
