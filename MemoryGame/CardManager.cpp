@@ -7,14 +7,11 @@
 /// </summary>
 /// <param name="filePath">string：ファイルパス</param>
 CardManager::CardManager(std::string filePath) :
-	cards(),
-	backCardHandle(-1),
+	card(),
+	renderCard(),
+	id(0),
 	selectCardID(-1),
-	selectCount(0),
-	showRow(4),
-	showCol(13),
-	showWidth(Config::Window::width / showCol),
-	showHeight(Config::Window::height / showRow)
+	selectCount(0)
 {
 	Initialize(filePath);
 }
@@ -40,8 +37,7 @@ void CardManager::Initialize(std::string filePath)
 	}
 
 	// カードの裏の画像ハンドル取得
-	backCardHandle = LoadGraph("image/card/torannpu-illust54.png");
-
+	renderCard.backCardHandle = LoadGraph("image/card/torannpu-illust54.png");
 	ShuffleCards();
 }
 
@@ -58,21 +54,33 @@ void CardManager::Update()
 /// </summary>
 void CardManager::Draw() const
 {
-	for (int i = 0; i < showRow; i++)
-	{
-		for (int j = 0; j < showCol; j++)
-		{
-			// 裏表のフラグによって表示するハンドルを切り替える
-			int hdl = -1;
-			if (cards[i * showCol + j].isBack) hdl = backCardHandle;
-			else hdl = cards[i * showCol + j].handle;
+	// カードを並べて表示
+	int row = renderCard.row;	// 行数
+	int col = renderCard.col;	// 列数
+	int hdl = -1;		// 仮画像ハンドル
+	int width = renderCard.width;		// 幅
+	int height = renderCard.height;		// 高さ
 
-			// 拡大縮小して表示
+	for (int i = 0; i < row; i++)
+	{
+		for (int j = 0; j < col; j++)
+		{
+			// 表示する画像ハンドルを取得
+			if (card[i * col + j].isBack)
+			{
+				hdl = renderCard.backCardHandle;
+			}
+			else
+			{
+				hdl = renderCard.handle[card[i * col + j].id];
+			}
+
+			// 1枚のカードを表示
 			DrawExtendGraph(
-				showWidth * j,
-				showHeight * i,
-				showWidth * j + showWidth,
-				showHeight * i + showHeight,
+				width * j,
+				height * i,
+				width * j + width,
+				height * i + height,
 				hdl, TRUE);
 		}
 	}
@@ -84,12 +92,11 @@ void CardManager::Draw() const
 void CardManager::Finalize()
 {
 	// 画像ハンドルの消去
-	for (Config::Card::CardData& card : cards)
+	for (int i = 0; i < 52; i++)
 	{
-		DeleteGraph(card.handle);
+		DeleteGraph(renderCard.handle[i]);
 	}
-
-	DeleteGraph(backCardHandle);
+	DeleteGraph(renderCard.backCardHandle);
 }
 
 /// <summary>
@@ -107,11 +114,13 @@ bool CardManager::IsCardSelect(int posX, int posY)
 	// 選択回数が規定数以上だったら、falseを返す
 	if (2 <= selectCount) return false;
 
+	int width = renderCard.width;
+	int height = renderCard.height;
 	int numX = -1, numY = -1;
 	// どの列に入るか調べる
-	for (int col = 0; col < showCol; col++)
+	for (int col = 0; col < renderCard.col; col++)
 	{
-		if (showWidth * col <= posX && posX <= showWidth * col + showWidth) 
+		if (width * col <= posX && posX <= width * col + width)
 		{
 			numX = col;
 			break;
@@ -119,9 +128,9 @@ bool CardManager::IsCardSelect(int posX, int posY)
 	}
 
 	// どの行に入るか調べる
-	for (int row = 0; row < showRow; row++)
+	for (int row = 0; row < renderCard.row; row++)
 	{
-		if (showHeight * row <= posY && posY <= showHeight * row + showHeight)
+		if (height * row <= posY && posY <= height * row + height)
 		{
 			numY = row;
 			break;
@@ -129,12 +138,12 @@ bool CardManager::IsCardSelect(int posX, int posY)
 	}
 
 	// 一度選択済みの場合は、重複を確認してから保存する
-	int num = numY * showCol + numX;
+	int num = numY * renderCard.col + numX;
 	if (selectCount == 1)
 	{
 		if (selectCardID[0] == num) return false;
 	}
-	
+
 	selectCardID[selectCount] = num;
 	selectCount++;
 	// カードを表にする
@@ -144,20 +153,62 @@ bool CardManager::IsCardSelect(int posX, int posY)
 }
 
 /// <summary>
+/// 選択した２枚のカードが同じ数字と色か調べる
+/// </summary>
+/// <returns></returns>
+void CardManager::CheckMatch()
+{
+	bool isMatch = true;	// そろったかどうか
+	// ２枚が異なる色なら、そろっていない
+	if (card[selectCardID[0]].isRed != card[selectCardID[1]].isRed)
+	{
+		isMatch = false;
+	}
+	// ２枚が異なる数字なら、そろっていない
+	if (card[selectCardID[0]].number != card[selectCardID[1]].number)
+	{
+		isMatch = false;
+	}
+
+	// 揃っていないなら、カードを裏返す
+	if (isMatch == false)
+	{
+		FlipCard(selectCardID[0]);
+		FlipCard(selectCardID[1]);
+	}
+}
+
+/// <summary>
+/// 選択をリセットする
+/// </summary>
+void CardManager::ResetSelect()
+{
+	// 選択したカード番号を初期化
+	for (int i = 0; i < 2; i++)
+	{
+		selectCardID[i] = -1;
+	}
+
+	// 選択回数を初期化
+	selectCount = 0;
+}
+
+/// <summary>
 /// カードのシャッフル
 /// （フィッシャーイーツ法を使用しています）
 /// </summary>
 void CardManager::ShuffleCards()
 {
 	// 配列の末尾から先頭にかけてシャッフルする
-	for (int i = sizeof(cards) / sizeof(Config::Card::CardData) - 1; i > 0; i--)
+	for (int i = sizeof(card) / sizeof(CardData) - 1; i > 0; i--)
 	{
-		// 乱数をiより前から求める
+		// 乱数をiから求める
 		int random = GetRand(i);
+
 		// ランダムな要素と入れ替える
-		Config::Card::CardData temp = cards[i];
-		cards[i] = cards[random];
-		cards[random] = temp;
+		CardData tep = card[i];
+		card[i] = card[random];
+		card[random] = tep;
 	}
 }
 
@@ -167,7 +218,7 @@ void CardManager::ShuffleCards()
 /// <param name="num">ひっくり返すカードのID</param>
 void CardManager::FlipCard(int num)
 {
-	cards[num].isBack = !cards[num].isBack;
+	card[num].isBack = !card[num].isBack;
 }
 
 /// <summary>
@@ -221,8 +272,7 @@ bool CardManager::LoadCardsFromCSV(std::string filePath)
 		}
 
 		// カードデータ格納
-		cards[count] = MakeCardData(std::stoi(columns[1]), columns[2], true, columns[3]);
-
+		card[count] = SaveCardData(std::stoi(columns[1]), columns[2], true, columns[3]);
 		count++;
 	}
 
@@ -239,17 +289,20 @@ bool CardManager::LoadCardsFromCSV(std::string filePath)
 /// <param name="isBack">bool[裏向きか]</param>
 /// <param name="filePath">string[画像ファイルパス]</param>
 /// <returns>CardData[データ入りのカード構造体]</returns>
-Config::Card::CardData& CardManager::MakeCardData(int num, std::string color, bool isBack, std::string filePath)
+CardManager::CardData& CardManager::SaveCardData(int num, std::string color, bool isBack, std::string filePath)
 {
-	Config::Card::CardData card;
-	// 構造体に代入
-	card.number = num;
-	card.isRed = color == "red";
-	card.isBack = isBack;
+	// カードの情報を代入
+	CardData data = {};
+	data.id = id;
+	data.number = num;
+	data.isRed = color == "red";
+	data.isBack = isBack;
 
 	// ファイルパスの組み立て
 	std::string path = "image/card/" + filePath;
-	card.handle = LoadGraph(path.c_str());
+	renderCard.handle[data.id] = LoadGraph(path.c_str());
 
-	return card;
+	id++;
+
+	return data;
 }

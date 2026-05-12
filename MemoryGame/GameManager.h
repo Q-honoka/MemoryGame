@@ -23,6 +23,13 @@ public:
 	GameManager&& operator=(GameManager&& other) = delete;
 
 private:
+	// プレイヤーのデータ
+	struct PlayerData
+	{
+		int turnCount;	// 経過ターン数
+		int score;		// スコア
+	};
+
 	void ChangeGameState();			// 状態を変える
 	CardManager cardManager;		// カードの管理クラス
 	InputManager inputManager;		// 入力の管理クラス

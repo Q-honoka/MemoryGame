@@ -33,7 +33,12 @@ void GameManager::Update()
 	// カードが2枚選択されたら、チェックする
 	if (state == Config::Game::GAME_STATE_CHECK_CARD)
 	{
-		
+		cardManager.CheckMatch();
+		cardManager.ResetSelect();
+
+		// ここで終わったか判定して、終わっていなければセレクトに戻す
+
+		nextState = Config::Game::GAME_STATE_FIRST_SELECT;
 	}
 	else
 	{
