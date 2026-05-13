@@ -50,4 +50,5 @@ private:
 	InputManager inputManager;		// 入力の管理クラス
 	State currentState;		// 現在の状態
 	State nextstate;		// 次の状態
+	int elapsedTime;		// 経過時間
 };

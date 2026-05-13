@@ -1,6 +1,8 @@
 ﻿#include "GameManager.h"
 #include "DxLib.h"
 
+constexpr int WAIT_TIME = 15;		// 待ち時間
+
 /// <summary>
 /// コンストラクタ
 /// </summary>
@@ -8,7 +10,8 @@ GameManager::GameManager() :
 	cardManager(CardManager("CSV/card.csv")),
 	inputManager(InputManager()),
 	currentState(State::START),
-	nextstate(State::NONE)
+	nextstate(State::NONE),
+	elapsedTime(0)
 {
 
 }
@@ -50,10 +53,16 @@ void GameManager::Update()
 		if (SelectCard())
 		{
 			SetNextState(CHECK_CARD);
+			elapsedTime = 0;
 		}
 		break;
 
 	case CHECK_CARD:		// カードがとれるかチェックする
+		if (elapsedTime < WAIT_TIME)
+		{
+			elapsedTime++;
+			break;
+		}
 		// カードがとれたら、ゲーム終了チェックをする
 		// そうでなければ、１枚目の選択に戻る
 		if (cardManager.CheckMatch())
