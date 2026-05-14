@@ -38,7 +38,6 @@ void GameManager::Update()
 	switch (currentState)
 	{
 	case START:		// ゲーム開始
-		DrawString(960, 1000, "SPACEキーでスタート", GetColor(255, 0, 0));
 		if (CheckHitKey(KEY_INPUT_SPACE))
 		{
 			SetNextState(FIRST_SELECT);
@@ -94,7 +93,6 @@ void GameManager::Update()
 		break;
 
 	case END:		// ゲーム終了
-		DrawString(960, 1000, "Rキーでリトライ", GetColor(255, 0, 0));
 		if (CheckHitKey(KEY_INPUT_R))
 		{
 			SetNextState(START);

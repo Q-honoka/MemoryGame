@@ -37,7 +37,7 @@ private:
 		bool isBack;	// 裏向きかどうか（true：裏, false：表）
 
 		// アニメーションの情報
-		float progress = 0;			// 進行度
+		float progress = 0;			// 進行度（0.0～1.0）
 		bool isFlipping = false;	// アニメーション中か（true：アニメーション中, false：アニメーションしていない）
 		bool isSwitched = false;	// 裏表が切り替わったか（true：切り替わった, false：切り替わってない）
 	};

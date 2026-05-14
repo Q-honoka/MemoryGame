@@ -259,7 +259,6 @@ void CardManager::ShuffleCards()
 /// <param name="num">ひっくり返すカードのID</param>
 void CardManager::FlipCard(int num)
 {
-	// card[num].isBack = !card[num].isBack;
 	card[num].isFlipping = true;
 	card[num].progress = 0;
 	card[num].isSwitched = false;
