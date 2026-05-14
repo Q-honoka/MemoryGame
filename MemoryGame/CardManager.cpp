@@ -1,6 +1,5 @@
 ﻿#include "CardManager.h"
 #include "DxLib.h"
-#include "Config.h"
 #include <sstream>
 
 constexpr int CARD_ALL_NUM = 52;
@@ -298,7 +297,7 @@ bool CardManager::LoadCardsFromCSV(std::string filePath)
 	FileRead_gets(readBuf, 256, fileHandle);
 
 	// 指定回数データを読み込む
-	while (FileRead_eof(fileHandle) == 0 && count < Config::Card::allCardsNum + 1)
+	while (FileRead_eof(fileHandle) == 0 && count < CARD_ALL_NUM + 1)
 	{
 		// １行読み込む
 		FileRead_gets(readBuf, 256, fileHandle);

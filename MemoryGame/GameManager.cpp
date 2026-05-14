@@ -1,5 +1,6 @@
 ﻿#include "GameManager.h"
 #include "DxLib.h"
+#include "Config.h"
 
 constexpr int WAIT_TIME = 15;		// 待ち時間
 
@@ -37,7 +38,7 @@ void GameManager::Update()
 	switch (currentState)
 	{
 	case START:		// ゲーム開始
-		DrawString(960, 900, "SPACEキーでスタート", GetColor(255, 0, 0));
+		DrawString(960, 1000, "SPACEキーでスタート", GetColor(255, 0, 0));
 		if (CheckHitKey(KEY_INPUT_SPACE))
 		{
 			SetNextState(FIRST_SELECT);
@@ -93,7 +94,7 @@ void GameManager::Update()
 		break;
 
 	case END:		// ゲーム終了
-		DrawString(960, 900, "Rキーでリトライ", GetColor(255, 0, 0));
+		DrawString(960, 1000, "Rキーでリトライ", GetColor(255, 0, 0));
 		if (CheckHitKey(KEY_INPUT_R))
 		{
 			SetNextState(START);
@@ -112,6 +113,32 @@ void GameManager::Update()
 void GameManager::Draw() const
 {
 	cardManager.Draw();
+	switch (currentState)
+	{
+	case START:		// ゲーム開始
+		DrawString(Config::Window::width / 6 * 2, Config::Window::height / 3, "SPACEキーでスタート", GetColor(255, 0, 0));
+		break;
+
+	case FIRST_SELECT:	// １枚目を選択中
+		break;
+
+	case SECOND_SELECT:		// ２枚目を選択中
+		break;
+
+	case CHECK_CARD:		// カードがとれるかチェックする
+		break;
+
+	case CHECK_GAMEEND:		// ゲーム終了かチェックする
+		break;
+
+	case END:		// ゲーム終了
+		DrawString(Config::Window::width / 6 * 2, Config::Window::height / 3, "Rキーでリトライ", GetColor(255, 0, 0));
+		break;
+
+	case NONE:
+	default:
+		break;
+	}
 }
 
 /// <summary>
