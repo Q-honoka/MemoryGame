@@ -3,6 +3,9 @@
 #include "Config.h"
 #include <sstream>
 
+constexpr int CARD_ALL_NUM = 52;
+constexpr float ANIM_SPEED = 0.1;
+
 /// <summary>
 /// コンストラクタ
 /// </summary>
@@ -39,6 +42,15 @@ void CardManager::Initialize(std::string filePath)
 
 	// カードの裏の画像ハンドル取得
 	renderCard.backCardHandle = LoadGraph("image/card/torannpu-illust54.png");
+	// カードのサイズを取得して、拡大率を求める
+	int result = GetGraphSize(renderCard.backCardHandle, &renderCard.imageWidth, &renderCard.imageHeight);
+	if (result != -1)
+	{
+		renderCard.baseScaleX = (double)renderCard.width / renderCard.imageWidth;
+		renderCard.baseScaleY = (double)renderCard.height / renderCard.imageHeight;
+	}
+
+	// カードをシャッフルする
 	ShuffleCards();
 }
 
@@ -47,7 +59,8 @@ void CardManager::Initialize(std::string filePath)
 /// </summary>
 void CardManager::Update()
 {
-
+	// カードのアニメーションを進行させる
+	FlipAnimation();
 }
 
 /// <summary>
@@ -66,23 +79,36 @@ void CardManager::Draw() const
 	{
 		for (int j = 0; j < col; j++)
 		{
+			int idx = i * col + j;
 			// 表示する画像ハンドルを取得
-			if (card[i * col + j].isBack)
+			if (card[idx].isBack)
 			{
 				hdl = renderCard.backCardHandle;
 			}
 			else
 			{
-				hdl = renderCard.handle[card[i * col + j].id];
+				hdl = renderCard.handle[card[idx].id];
 			}
 
 			// 1枚のカードを表示
-			DrawExtendGraph(
-				width * j,
-				height * i,
-				width * j + width,
-				height * i + height,
-				hdl, TRUE);
+			//DrawExtendGraph(
+			//	width * j,
+			//	height * i,
+			//	width * j + width,
+			//	height * i + height,
+			//	hdl, TRUE);
+
+			// カードの表示
+			double flip = fabs(cos(card[idx].progress));
+			DrawRotaGraph3(
+				width * j + width / 2,
+				height * i + height / 2,
+				renderCard.imageWidth / 2,
+				renderCard.imageHeight / 2,
+				renderCard.baseScaleX * flip,
+				renderCard.baseScaleY,
+				0, hdl, TRUE, FALSE
+			);
 		}
 	}
 }
@@ -93,7 +119,7 @@ void CardManager::Draw() const
 void CardManager::Finalize()
 {
 	// 画像ハンドルの消去
-	for (int i = 0; i < 52; i++)
+	for (int i = 0; i < CARD_ALL_NUM; i++)
 	{
 		DeleteGraph(renderCard.handle[i]);
 	}
@@ -192,10 +218,11 @@ bool CardManager::CheckMatch()
 /// </returns>
 bool CardManager::IsFrontAllCard()
 {
-	for (int i = 0; i < 52; i++)
+	for (int i = 0; i < CARD_ALL_NUM; i++)
 	{
-		// 裏向きが１枚でもあればfalseを返す
+		// 裏向きまたはアニメーション中のカードが１枚でもあればfalseを返す
 		if (card[i].isBack) return false;
+		if (card[i].isFlipping) return false;
 	}
 
 	return true;
@@ -241,7 +268,10 @@ void CardManager::ShuffleCards()
 /// <param name="num">ひっくり返すカードのID</param>
 void CardManager::FlipCard(int num)
 {
-	card[num].isBack = !card[num].isBack;
+	// card[num].isBack = !card[num].isBack;
+	card[num].isFlipping = true;
+	card[num].progress = 0;
+	card[num].isSwitched = false;
 }
 
 /// <summary>
@@ -328,4 +358,48 @@ CardManager::CardData& CardManager::SaveCardData(int num, std::string color, boo
 	id++;
 
 	return data;
+}
+
+/// <summary>
+/// カードのリセットと並べなおしをする
+/// </summary>
+void CardManager::Reset()
+{
+	// すべてのカードを裏向きにする
+	for (int i = 0; i < CARD_ALL_NUM; i++)
+	{
+		card[i].isBack = true;
+	}
+
+	ShuffleCards();
+}
+
+/// <summary>
+/// カードのアニメーションを進める
+/// </summary>
+void CardManager::FlipAnimation()
+{
+	for (CardData& c : card)
+	{
+		// アニメーション中なら進行する
+		if (c.isFlipping)
+		{
+			// 最後まで到達したら、アニメーションを終了する
+			if (c.progress >= 1.0)
+			{
+				c.isFlipping = false;
+				c.progress = 0;
+				return;
+			}
+
+			c.progress += ANIM_SPEED;
+
+			// 半分経過したら、裏表を逆にする
+			if (c.progress >= 0.5 && !c.isSwitched)
+			{
+				c.isBack = !c.isBack;
+				c.isSwitched = true;
+			}
+		}
+	}
 }
