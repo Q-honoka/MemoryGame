@@ -89,14 +89,6 @@ void CardManager::Draw() const
 				hdl = renderCard.handle[card[idx].id];
 			}
 
-			// 1枚のカードを表示
-			//DrawExtendGraph(
-			//	width * j,
-			//	height * i,
-			//	width * j + width,
-			//	height * i + height,
-			//	hdl, TRUE);
-
 			// カードの表示
 			double flip = fabs(cos(card[idx].progress));
 			DrawRotaGraph3(
@@ -341,7 +333,7 @@ bool CardManager::LoadCardsFromCSV(std::string filePath)
 /// <param name="isBack">bool[裏向きか]</param>
 /// <param name="filePath">string[画像ファイルパス]</param>
 /// <returns>CardData[データ入りのカード構造体]</returns>
-CardManager::CardData& CardManager::SaveCardData(int num, std::string color, bool isBack, std::string filePath)
+CardManager::CardData CardManager::SaveCardData(int num, std::string color, bool isBack, std::string filePath)
 {
 	// カードの情報を代入
 	CardData data = {};

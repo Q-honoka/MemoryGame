@@ -61,7 +61,7 @@ private:
 	void FlipCard(int num);	// カードの表裏を変える
 	void ResetSelect();		// 選択を初期化する
 	bool LoadCardsFromCSV(std::string filePath);	// CSVファイルの読み込み
-	CardData& SaveCardData(int num, std::string color, bool isBack, std::string filePath);	// カード構造体を作成して返す
+	CardData SaveCardData(int num, std::string color, bool isBack, std::string filePath);	// カード構造体を作成して返す
 	void FlipAnimation();	// アニメーションを進行する
 
 	CardData card[52];		// すべてのカードデータ
