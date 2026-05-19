@@ -3,6 +3,7 @@
 #include "Config.h"
 
 constexpr int WAIT_TIME = 15;		// 待ち時間
+constexpr int LINE_SPACE = 100;		// 行間
 
 /// <summary>
 /// コンストラクタ
@@ -10,10 +11,13 @@ constexpr int WAIT_TIME = 15;		// 待ち時間
 GameManager::GameManager() :
 	cardManager(CardManager("CSV/card.csv")),
 	inputManager(InputManager()),
+	playerData(0),
 	currentState(State::START),
 	nextstate(State::NONE),
 	elapsedTime(0),
-	isPlaySound(false)
+	isPlaySound(false),
+	isMatch(false),
+	currentStreak(0)
 {
 
 }
@@ -73,9 +77,30 @@ void GameManager::Update()
 		if (cardManager.CheckMatch())
 		{
 			SetNextState(CHECK_GAMEEND);
+			// 連続成功記録をつける
+			if (isMatch)
+			{
+				currentStreak++;
+			}
+			else
+			{
+				currentStreak = 1;
+				isMatch = true;
+			}
 		}
 		else
 		{
+			// 連続成功記録の更新をする
+			if (playerData.streak < currentStreak)
+			{
+				playerData.streak = currentStreak;
+			}
+
+			playerData.missCount++;
+			// リセット処理
+			isMatch = false;
+			currentStreak = 0;
+
 			SetNextState(FIRST_SELECT);
 		}
 		break;
@@ -85,6 +110,11 @@ void GameManager::Update()
 		// そうでなければ、１枚目の選択に戻る
 		if (cardManager.IsFrontAllCard())
 		{
+			// 連続成功記録の更新をする
+			if (playerData.streak < currentStreak)
+			{
+				playerData.streak = currentStreak;
+			}
 			SetNextState(END);
 		}
 		else
@@ -122,7 +152,7 @@ void GameManager::Draw() const
 	switch (currentState)
 	{
 	case START:		// ゲーム開始
-		DrawString(Config::Window::width / 6 * 2, Config::Window::height / 3, "SPACEキーでスタート", GetColor(255, 0, 0));
+		DrawString(Config::Window::width / 6 * 2, Config::Window::height - LINE_SPACE, "SPACEキーでスタート", GetColor(0, 255, 255));
 		break;
 
 	case FIRST_SELECT:	// １枚目を選択中
@@ -138,7 +168,9 @@ void GameManager::Draw() const
 		break;
 
 	case END:		// ゲーム終了
-		DrawString(Config::Window::width / 6 * 2, Config::Window::height / 3, "Rキーでリトライ", GetColor(255, 0, 0));
+		DrawString(Config::Window::width / 6 * 2, Config::Window::height - LINE_SPACE * 3, "Rキーでリトライ", GetColor(0, 255, 255));
+		DrawFormatString(Config::Window::width / 6 * 2, Config::Window::height - LINE_SPACE * 2, GetColor(0, 255, 255), "ミスした回数：%d", playerData.missCount);
+		DrawFormatString(Config::Window::width / 6 * 2, Config::Window::height - LINE_SPACE, GetColor(0, 255, 255), "連続成功回数：%d", playerData.streak);
 		break;
 
 	case NONE:
