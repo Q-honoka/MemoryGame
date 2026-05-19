@@ -51,4 +51,5 @@ private:
 	State currentState;		// 現在の状態
 	State nextstate;		// 次の状態
 	int elapsedTime;		// 経過時間
+	bool isPlaySound;			// 音を再生したかどうか
 };

@@ -12,7 +12,8 @@ GameManager::GameManager() :
 	inputManager(InputManager()),
 	currentState(State::START),
 	nextstate(State::NONE),
-	elapsedTime(0)
+	elapsedTime(0),
+	isPlaySound(false)
 {
 
 }
@@ -93,6 +94,13 @@ void GameManager::Update()
 		break;
 
 	case END:		// ゲーム終了
+		// クリア時の音を一度だけ再生する
+		if (isPlaySound == false)
+		{
+			PlaySoundFile("sound/clear.mp3", DX_PLAYTYPE_BACK);
+			isPlaySound = true;
+		}
+		// リトライ処理
 		if (CheckHitKey(KEY_INPUT_R))
 		{
 			SetNextState(START);
